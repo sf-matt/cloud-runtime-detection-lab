@@ -50,26 +50,27 @@ This project focuses on **real-world attacker techniques** in Kubernetes and clo
 
 ---
 
-## 📁 Project Structure
+## 📁 Detection Modules and Layout
 
 ```bash
 .
+├── README.md
 ├── detections/
-│   ├── TOCTOU-configmap.md
-│   ├── syscall-anomaly-nginx.md
-│   └── iam-misuse.md
+│   ├── TOCTOU-configmap-detect.md
+│   └── TOCTOU-configmap-block.md
 ├── rules/
 │   ├── falco/
+│   │   └── toctou-configmap-detect.yaml
 │   └── kubearmor/
+│       └── toctou-configmap-block.yaml
 ├── simulations/
-│   ├── simulate-toctou.sh
-│   └── simulate-iam-abuse.yaml
-├── lifecycle/
-│   └── deploy-rule.sh
-├── threat-models/
-│   └── iam-lateral-movement.md
-└── README.md
-```
+│   ├── simulate-toctou-detect.sh
+│   └── simulate-toctou-block.yaml
+├── lifecycle/                    # (empty for now)
+└── threat-models/                # (empty for now)
+
+
+💡 Each detection module includes: a rule, a simulation, and supporting documentation. Prevention rules (KubeArmor) are paired with detection logic (Falco) to show defense-in-depth.
 
 ---
 
