@@ -1,0 +1,16 @@
+apiVersion: security.kubearmor.com/v1
+kind: KubeArmorPolicy
+metadata:
+  name: block-configmap-write
+  namespace: default
+spec:
+  severity: 4
+  message: "Blocked write attempt to ConfigMap volume (possible TOCTOU attack)"
+  selector:
+    matchLabels:
+      app: your-app-name  # adjust this label to match your test pod
+  file:
+    matchPaths:
+    - path: /mnt/configmap
+      readOnly: true
+  action: Block

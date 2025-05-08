@@ -1,0 +1,12 @@
+- rule: TOCTOU ConfigMap Modification Detected
+  desc: Detects potential TOCTOU privilege escalation via ConfigMap being modified at runtime by a containerized process.
+  condition: >
+    evt.type = write and
+    fd.name contains "/volumes/kubernetes.io~configmap/" and
+    proc.name in (cp, mv, echo, sed, vi, nano) and
+    container and
+    evt.dir = <
+  output: "TOCTOU ConfigMap modification detected by %proc.name (user=%user.name, container=%container.id) on file %fd.name"
+  priority: WARNING
+  tags: [k8s, configmap, toctou, runtime]
+  enabled: true
