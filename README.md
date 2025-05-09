@@ -6,102 +6,88 @@ This repo demonstrates how to build, simulate, and document real-world Kubernete
 
 ## 🎯 Purpose
 
-- Write and test custom Falco detection rules
-- Block known techniques with KubeArmor policies
-- Simulate attacks like TOCTOU (Time-of-Check to Time-of-Use) and RBAC abuse
-- Build reusable, modular threat detection bundles
-- Document outcomes for learning, visibility, and credibility
+- Build custom runtime detections and prevention rules
+- Simulate attacks to validate detections (TOCTOU, RBAC misuse)
+- Use Falco for detection and KubeArmor for enforcement
+- Validate detections with structured, test-driven workflows
+- Operate modular, tool-separated tests with simple CLI menus
 
 ---
 
-## 📁 Detection Modules and Layout
+## 📁 Structure Overview
 
 ```bash
 .
-├── README.md
-├── detections/
-│   ├── TOCTOU-configmap-block.md
-│   ├── TOCTOU-configmap-detect.md
-│   ├── TOCTOU-outcome.md
-│   └── rbac-api-misuse-detect.md
-├── lifecycle/
-│   ├── deploy-falco-rules.sh
-│   └── test-lab.sh
+├── detections/                  # Markdown docs explaining each scenario
+├── lifecycle/                   # Scripts to deploy rules and run tests
+│   ├── deploy-falco-rules.sh    # Modular deploy: pass "toctou", "rbac", or "all"
+│   └── test-lab.sh              # Interactive detection and policy tester
 ├── rules/
 │   ├── falco/
-│   │   ├── toctou-configmap-detect.yaml
-│   │   └── rbac-api-misuse-detect.yaml
+│   │   ├── toctou/
+│   │   │   └── toctou-configmap-detect.yaml
+│   │   └── rbac/
+│   │       └── rbac-api-misuse-detect.yaml
 │   └── kubearmor/
 │       └── toctou-configmap-block.yaml
-├── setup/
-│   ├── falco-install.md
-│   └── lab.md
 ├── simulations/
-│   ├── simulate-toctou-block.sh
 │   ├── simulate-toctou-detect.sh
+│   ├── simulate-toctou-block.sh
 │   └── simulate-rbac-abuse.sh
-├── threat-models/                # (to be added)
-└── rbac-abuser-role.yaml
+├── rbac-abuser-role.yaml        # RBAC setup for the misuse test
+└── README.md
 ```
-
----
-
-## 🧪 Detection & Enforcement Scenarios
-
-- **TOCTOU: ConfigMap Modification**
-  - Falco detects unauthorized write attempts to `/mnt/configmap`
-  - KubeArmor blocks those writes at runtime
-  - Simulation script triggers the event for both tools
-  - [View Detection Doc](detections/TOCTOU-configmap-detect.md)
-  - [View Block Doc](detections/TOCTOU-configmap-block.md)
-
-- **RBAC API Misuse**
-  - Pod with excessive permissions accesses the K8s API
-  - Falco detects runtime access to secrets via token + curl
-  - [View Detection Doc](detections/rbac-api-misuse-detect.md)
 
 ---
 
 ## 🧪 Test-Driven Detection Development (TDDD)
 
-Each detection rule in this repo is paired with:
+Each scenario includes:
 
-- A simulation script that mimics attacker behavior
-- A custom Falco rule designed to catch that behavior
-- A test runner script (`test-lab.sh`) to automate validation with pass/fail output
-
-This enables:
-
-- Reliable validation of detection logic
-- Fast tuning during development
-- Repeatable tests for confidence in production rules
+- A simulation script to reproduce attacker behavior
+- A custom detection rule (Falco or KubeArmor)
+- A test menu entry that deploys rules, runs simulations, and checks logs
+- ✅ / ❌ feedback so you know if the detection fired
 
 ---
 
-## 📌 MITRE ATT&CK Mapping
+## 🧭 How to Use
 
-Detection modules include mapped MITRE techniques to better contextualize threat coverage, such as:
+### 🛠 Deploy Falco Rules
 
-- T1609 – Container Administration Command
-- T1611 – Escape to Host
-- T1546.001 – Event Triggered Execution
-- T1203 – Exploitation for Client Execution
+```bash
+./lifecycle/deploy-falco-rules.sh toctou
+./lifecycle/deploy-falco-rules.sh rbac
+./lifecycle/deploy-falco-rules.sh all
+```
 
 ---
 
-## ✅ Outcomes
+### 🔬 Run Tests
 
-- Proved that TOCTOU-style tampering is detectable by syscall monitoring
-- Validated that detection triggers exactly during the exploitation window
-- Demonstrated prevention with enforcement at the LSM layer
-- Simulated and detected Kubernetes API misuse via over-permissioned RBAC
-- Documented detection logic, simulation results, and impact for each scenario
+```bash
+./lifecycle/test-lab.sh
+```
+
+Menu gives you:
+- Falco detections (TOCTOU, RBAC)
+- KubeArmor enforcement
+- Log viewing (per tool)
+
+---
+
+## 🔍 Scenarios Included
+
+| Scenario               | Detection Tool | Prevention Tool | MITRE Techniques |
+|------------------------|----------------|------------------|------------------|
+| TOCTOU ConfigMap Write | Falco          | KubeArmor        | T1611, T1203     |
+| RBAC API Misuse        | Falco          | N/A              | T1078.004, T1087 |
 
 ---
 
 ## 🤖 Credits
 
-Built using:
+Built with:
 - [Falco](https://falco.org/)
 - [KubeArmor](https://github.com/kubearmor/KubeArmor)
-- Guided by AI assistant (ChatGPT 4.0) for structure, rules, and simulation logic
+- [ChatGPT](https://openai.com/chatgpt) for rule design, scripting, and simulation logic
