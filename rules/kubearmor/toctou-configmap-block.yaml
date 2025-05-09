@@ -5,12 +5,12 @@ metadata:
   namespace: default
 spec:
   severity: 4
-  message: "Blocked write attempt to ConfigMap volume (possible TOCTOU attack)"
+  message: "TOCTOU prevention: Block write access to ConfigMap directory"
   selector:
     matchLabels:
       app: demo
   file:
-    matchPaths:
-    - path: /mnt/configmap
-      readOnly: true
+    matchDirectories:
+      - dir: /mnt/configmap/
+        recursive: true
   action: Block

@@ -34,34 +34,21 @@ This repo demonstrates how to build, simulate, and document real-world Kubernete
 │   ├── falco-install.md
 │   └── lab.md
 ├── simulations/
-│   ├── simulate-toctou-block.yaml
+│   ├── simulate-toctou-block.sh
 │   └── simulate-toctou-detect.sh
 └── threat-models/                # (to be added)
 ```
 
-> 💡 Each detection module includes: a rule, a simulation, and supporting documentation. Prevention rules (KubeArmor) are paired with detection logic (Falco) to show defense-in-depth.
-
 ---
 
-## 🚀 Getting Started with Falco
-
-Install Falco with Helm:
-
-```bash
-helm repo add falcosecurity https://falcosecurity.github.io/charts
-helm install falco falcosecurity/falco -n falco --create-namespace
-```
-
-For full instructions and how to add custom rules, see: [`setup/falco-install.md`](setup/falco-install.md)
-
----
-
-## 🧪 Detection Scenarios
+## 🧪 Detection & Enforcement Scenarios
 
 - **TOCTOU: ConfigMap Modification**
   - Falco detects unauthorized write attempts to `/mnt/configmap`
-  - KubeArmor prevents those writes with a block policy
+  - KubeArmor blocks those writes at runtime
   - Simulation script triggers the event for both tools
+  - [View Detection Doc](detections/TOCTOU-configmap-detect.md)
+  - [View Block Doc](detections/TOCTOU-configmap-block.md)
 
 ---
 
@@ -69,8 +56,19 @@ For full instructions and how to add custom rules, see: [`setup/falco-install.md
 
 - Proved that TOCTOU-style tampering is detectable by syscall monitoring
 - Validated that detection triggers exactly during the exploitation window
-- Documented with full rule logic, simulation artifacts, and alert analysis
-- Next: Add more detection bundles for DNS tunneling, IAM abuse, etc.
+- Demonstrated prevention with enforcement at the LSM layer
+- Documented the full detection-prevention loop with MITRE context
+
+---
+
+## 📌 MITRE ATT&CK Mapping
+
+Detection modules include mapped MITRE techniques to better contextualize threat coverage, such as:
+
+- T1609 – Container Administration Command
+- T1611 – Escape to Host
+- T1546.001 – Event Triggered Execution
+- T1203 – Exploitation for Client Execution
 
 ---
 
