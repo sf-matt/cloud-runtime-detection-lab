@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "[*] Merging all Falco rules from rules/falco/ into one custom rules file..."
+echo "[*] Merging all Falco rules from rules/falco/ with proper YAML separators..."
 
-# Combine all individual rule files into a single temp file
-cat rules/falco/*.yaml > .falco-merged-rules.yaml
+# Combine all individual rule files into a single temp file with separators
+find rules/falco -name "*.yaml" -exec echo "---" \; -exec cat {} \; > .falco-merged-rules.yaml
 
 echo "[*] Applying merged rules via Helm..."
 helm upgrade falco falcosecurity/falco -n falco \
