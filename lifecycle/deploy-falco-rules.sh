@@ -25,7 +25,6 @@ else
   TARGET_FILE=".falco-${MODULE}-rules.yaml"
 fi
 
-echo "[*] Deploying rules from $TARGET_FILE to Falco..."
 echo "[*] Upgrading Falco..."
 if helm upgrade falco falcosecurity/falco -n falco \
   --set-file customRules.customRules="$TARGET_FILE" > /dev/null 2>&1; then
@@ -36,5 +35,3 @@ else
   echo "❌ Failed to upgrade Falco. Check your Helm deployment."
   exit 1
 fi
-
-echo "✅ Falco rules for '$MODULE' deployed."
