@@ -7,6 +7,6 @@ cat rules/falco/*.yaml > .falco-merged-rules.yaml
 
 echo "[*] Applying merged rules via Helm..."
 helm upgrade falco falcosecurity/falco -n falco \
-  --set-file customRules.custom-rules.yaml=.falco-merged-rules.yaml
+  --set-file customRules.customRules=.falco-merged-rules.yaml
 
 echo "✅ All custom Falco rules deployed."
