@@ -8,7 +8,7 @@ This repo demonstrates how to build, simulate, and document real-world Kubernete
 
 - Write and test custom Falco detection rules
 - Block known techniques with KubeArmor policies
-- Simulate attacks like TOCTOU (Time-of-Check to Time-of-Use)
+- Simulate attacks like TOCTOU (Time-of-Check to Time-of-Use) and RBAC abuse
 - Build reusable, modular threat detection bundles
 - Document outcomes for learning, visibility, and credibility
 
@@ -22,12 +22,15 @@ This repo demonstrates how to build, simulate, and document real-world Kubernete
 ├── detections/
 │   ├── TOCTOU-configmap-block.md
 │   ├── TOCTOU-configmap-detect.md
-│   └── TOCTOU-outcome.md
+│   ├── TOCTOU-outcome.md
+│   └── rbac-api-misuse-detect.md
 ├── lifecycle/
-│   └── falco-rule-test.sh
+│   ├── deploy-falco-rules.sh
+│   └── test-lab.sh
 ├── rules/
 │   ├── falco/
-│   │   └── toctou-configmap-detect.yaml
+│   │   ├── toctou-configmap-detect.yaml
+│   │   └── rbac-api-misuse-detect.yaml
 │   └── kubearmor/
 │       └── toctou-configmap-block.yaml
 ├── setup/
@@ -35,8 +38,10 @@ This repo demonstrates how to build, simulate, and document real-world Kubernete
 │   └── lab.md
 ├── simulations/
 │   ├── simulate-toctou-block.sh
-│   └── simulate-toctou-detect.sh
-└── threat-models/                # (to be added)
+│   ├── simulate-toctou-detect.sh
+│   └── simulate-rbac-abuse.sh
+├── threat-models/                # (to be added)
+└── rbac-abuser-role.yaml
 ```
 
 ---
@@ -50,14 +55,26 @@ This repo demonstrates how to build, simulate, and document real-world Kubernete
   - [View Detection Doc](detections/TOCTOU-configmap-detect.md)
   - [View Block Doc](detections/TOCTOU-configmap-block.md)
 
+- **RBAC API Misuse**
+  - Pod with excessive permissions accesses the K8s API
+  - Falco detects runtime access to secrets via token + curl
+  - [View Detection Doc](detections/rbac-api-misuse-detect.md)
+
 ---
 
-## ✅ Outcomes
+## 🧪 Test-Driven Detection Development (TDDD)
 
-- Proved that TOCTOU-style tampering is detectable by syscall monitoring
-- Validated that detection triggers exactly during the exploitation window
-- Demonstrated prevention with enforcement at the LSM layer
-- Documented the full detection-prevention loop with MITRE context
+Each detection rule in this repo is paired with:
+
+- A simulation script that mimics attacker behavior
+- A custom Falco rule designed to catch that behavior
+- A test runner script (`test-lab.sh`) to automate validation with pass/fail output
+
+This enables:
+
+- Reliable validation of detection logic
+- Fast tuning during development
+- Repeatable tests for confidence in production rules
 
 ---
 
@@ -69,6 +86,16 @@ Detection modules include mapped MITRE techniques to better contextualize threat
 - T1611 – Escape to Host
 - T1546.001 – Event Triggered Execution
 - T1203 – Exploitation for Client Execution
+
+---
+
+## ✅ Outcomes
+
+- Proved that TOCTOU-style tampering is detectable by syscall monitoring
+- Validated that detection triggers exactly during the exploitation window
+- Demonstrated prevention with enforcement at the LSM layer
+- Simulated and detected Kubernetes API misuse via over-permissioned RBAC
+- Documented detection logic, simulation results, and impact for each scenario
 
 ---
 

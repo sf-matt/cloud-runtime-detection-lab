@@ -1,0 +1,9 @@
+- rule: RBAC API Misuse Detection
+  desc: Detect access to Kubernetes API via service account token in container
+  condition: >
+    container and proc.name = curl and
+    fd.name contains "kubernetes.default.svc"
+  output: "RBAC API misuse detected by %proc.name accessing %fd.name"
+  priority: WARNING
+  tags: [k8s, rbac, apiserver, runtime]
+  enabled: true
