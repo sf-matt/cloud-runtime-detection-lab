@@ -1,34 +1,12 @@
 #!/bin/bash
+echo "[*] Running TOCTOU detection simulation (Falco) — expect alert, not block"
 
-# 1. Create a ConfigMap
-kubectl create configmap demo-config --from-literal=entry=original
+# Clean up previous pod
+kubectl delete pod toctou-falco-test --ignore-not-found
 
-# 2. Deploy a pod that mounts the ConfigMap
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: toctou-test
-  labels:
-    app: demo
-spec:
-  containers:
-  - name: demo-container
-    image: busybox
-    command: ["/bin/sh", "-c", "sleep 3600"]
-    volumeMounts:
-    - name: config
-      mountPath: /mnt/configmap
-  volumes:
-  - name: config
-    configMap:
-      name: demo-config
-EOF
+# Run pod with label for Falco
+kubectl run toctou-falco-test --image=busybox --restart=Never --labels=app=demo-falco -- sh -c 'echo hacked > /mnt/configmap/entry'
 
-echo "Waiting 5 seconds before modifying the ConfigMap file..."
-sleep 5
-
-# 3. Modify the mounted file inside the running container (simulating TOCTOU)
-kubectl exec toctou-test -- sh -c "echo hacked > /mnt/configmap/entry"
-
-echo "TOCTOU simulation complete. Check Falco logs or Sidekick outputs."
+# Check logs
+echo "[*] Pod logs:"
+kubectl logs toctou-falco-test

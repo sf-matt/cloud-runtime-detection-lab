@@ -1,12 +1,18 @@
 #!/bin/bash
-echo "[*] Running TOCTOU block simulation (expect: permission denied)"
+echo "[*] Running TOCTOU block simulation (KubeArmor) — expect permission denied"
 
-# Clean up any previous run
-kubectl delete pod toctou-test --ignore-not-found
+# Apply KubeArmor policy and wait for enforcement to attach
+echo "[*] Applying KubeArmor policy..."
+kubectl apply -f rules/kubearmor/toctou-configmap-block.yaml
+echo "[*] Waiting for enforcement to activate..."
+sleep 5
 
-# Recreate the pod and attempt the TOCTOU-style write
-kubectl run toctou-test --image=busybox --restart=Never --labels=app=demo -- sh -c 'echo hacked > /mnt/configmap/entry'
+# Clean up previous pod
+kubectl delete pod toctou-kubearmor-test --ignore-not-found
 
-# Show the logs to verify enforcement
+# Run pod with isolated label
+kubectl run toctou-kubearmor-test --image=busybox --restart=Never --labels=app=demo-kubearmor -- sh -c 'echo hacked > /mnt/configmap/entry'
+
+# Check output
 echo "[*] Pod logs:"
-kubectl logs toctou-test
+kubectl logs toctou-kubearmor-test

@@ -8,7 +8,7 @@ spec:
   message: "TOCTOU prevention: Block write access to ConfigMap directory"
   selector:
     matchLabels:
-      app: demo
+      app: demo-kubearmor
   file:
     matchDirectories:
       - dir: /mnt/configmap/

@@ -1,12 +1,25 @@
 #!/bin/bash
 
-echo "[*] Merging all Falco rules from rules/falco/ with proper YAML separators..."
+MODULE=$1
 
-# Combine all individual rule files into a single temp file with separators
-find rules/falco -name "*.yaml" -exec echo "---" \; -exec cat {} \; > .falco-merged-rules.yaml
+if [ -z "$MODULE" ]; then
+  echo "❌ Usage: $0 <module-name>"
+  echo "Available modules: toctou, rbac"
+  exit 1
+fi
 
-echo "[*] Applying merged rules via Helm..."
+RULE_DIR="rules/falco/$MODULE"
+
+if [ ! -d "$RULE_DIR" ]; then
+  echo "❌ No such module directory: $RULE_DIR"
+  exit 1
+fi
+
+echo "[*] Merging rules for module '$MODULE'..."
+find "$RULE_DIR" -name "*.yaml" -exec echo "---" \; -exec cat {} \; > ".falco-${MODULE}-rules.yaml"
+
+echo "[*] Deploying merged rules to Falco..."
 helm upgrade falco falcosecurity/falco -n falco \
-  --set-file customRules.customRules=.falco-merged-rules.yaml
+  --set-file customRules.customRules=".falco-${MODULE}-rules.yaml"
 
-echo "✅ All custom Falco rules deployed."
+echo "✅ Falco rules for '$MODULE' deployed."
