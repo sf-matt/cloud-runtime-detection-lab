@@ -2,7 +2,7 @@
   desc: Detects potential TOCTOU privilege escalation via ConfigMap being modified at runtime by a containerized process.
   condition: >
     evt.type = write and
-    fd.name contains "/volumes/kubernetes.io~configmap/" and
+    fd.name startswith "/mnt/configmap") and
     proc.name in (cp, mv, echo, sed, vi, nano) and
     container and
     evt.dir = <

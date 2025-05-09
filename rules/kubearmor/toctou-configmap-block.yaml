@@ -8,7 +8,7 @@ spec:
   message: "Blocked write attempt to ConfigMap volume (possible TOCTOU attack)"
   selector:
     matchLabels:
-      app: your-app-name  # adjust this label to match your test pod
+      app: demo
   file:
     matchPaths:
     - path: /mnt/configmap
