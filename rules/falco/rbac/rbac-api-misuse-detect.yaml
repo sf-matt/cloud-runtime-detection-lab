@@ -1,9 +1,12 @@
-- rule: RBAC API Misuse Detection
-  desc: Detect access to Kubernetes API via service account token in container
+- rule: RBAC API Misuse Detected
+  desc: Detects Kubernetes API requests that return a Forbidden error when accessing sensitive resources.
   condition: >
-    container and proc.name = curl and
-    fd.name contains "kubernetes.default.svc"
-  output: "RBAC API misuse detected by %proc.name accessing %fd.name"
+    jevt.value.error = "Forbidden" and
+    jevt.value.kind = "secrets" and
+    jevt.value.verb in (get, list)
+  output: >
+    RBAC API misuse detected: user=%jevt.value.user.username verb=%jevt.value.verb resource=%jevt.value.kind
+    uri=%jevt.value.requestURI reason=%jevt.value.responseStatus.message
   priority: WARNING
-  tags: [k8s, rbac, apiserver, runtime]
-  enabled: true
+  tags: [k8s, rbac, audit, detection]
+  source: k8s_audit

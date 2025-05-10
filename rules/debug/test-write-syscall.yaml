@@ -1,0 +1,6 @@
+- rule: Test Write Syscall
+  desc: Fires on any write attempt inside a container.
+  condition: evt.type = write and container
+  output: "TEST: Write syscall detected by %proc.name on file %fd.name"
+  priority: INFO
+  tags: [debug, test]

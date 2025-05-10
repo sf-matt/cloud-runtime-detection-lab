@@ -1,11 +1,12 @@
 - rule: TOCTOU ConfigMap Modification Detected
-  desc: Detects potential TOCTOU privilege escalation via ConfigMap being modified at runtime by a containerized process.
+  desc: Detects attempted modification of files in a mounted ConfigMap (TOCTOU pattern).
   condition: >
-    (evt.type = write and
-     fd.name contains "/mnt/configmap" and
-     proc.name in (cp, mv, echo, sed, vi, nano) and
-     container and
-     evt.dir = <)
-  output: "TOCTOU ConfigMap modification detected by %proc.name (user=%user.name, container=%container.id) on file %fd.name"
+    (evt.type in (open, openat, openat2) and
+     evt.is_open_write = true) and
+     fd.name startswith "/mnt/configmap" and
+    container
+  output: >
+    TOCTOU ConfigMap modification attempt detected by %proc.name (user=%user.name, container=%container.id)
+    opening file %fd.name
   priority: WARNING
   tags: [k8s, configmap, toctou, runtime]
