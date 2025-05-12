@@ -49,12 +49,12 @@ while true; do
   case $choice in
     1)
       wait_for_falco
-      ./simulations/falco/toctou/simulate-detect.sh >/dev/null 2>&1
+      ./simulations/falco/toctou/simulate-detect.sh
       check_logs TOCTOU
       ;;
     2)
       wait_for_falco
-      ./simulations/falco/rbac/simulate-rbac-abuse.sh >/dev/null 2>&1
+      ./simulations/falco/rbac/simulate-rbac-abuse.sh
       check_logs secrets
       ;;
     3)
@@ -65,7 +65,7 @@ while true; do
       ;;
     4)
       wait_for_falco
-      ./simulations/falco/debug/simulate-generic-write.sh >/dev/null 2>&1
+      ./simulations/falco/debug/simulate-generic-write.sh
       check_logs "TEST: Write"
       ;;
     5)
@@ -74,16 +74,11 @@ while true; do
       ;;
     6)
       echo "📄 Log Viewer"
-      echo "1) Falco Logs (all pods)"
+      echo "1) Falco Logs"
       echo "2) KubeArmor Logs"
       read -p "Choice: " log_choice
       case $log_choice in
-        1)
-          for pod in $(kubectl get pods -n falco -l app.kubernetes.io/instance=falco -o name); do
-            echo "==> $pod"
-            kubectl logs -n falco "$pod" --tail=100
-          done
-          ;;
+        1) kubectl logs -n falco -l app.kubernetes.io/instance=falco --tail=100 ;;
         2) kubectl logs -n kubearmor -l kubearmor-app=kubearmor --tail=100 ;;
         *) echo "Invalid log choice." ;;
       esac
