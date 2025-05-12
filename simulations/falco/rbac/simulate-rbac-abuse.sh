@@ -32,7 +32,7 @@ kubectl exec rbac-abuse-test -- sh -c '
     https://kubernetes.default.svc/api/v1/secrets
 '
 
-echo "[*] Done. Check Falco logs to confirm detection."
+echo "[*] Done."
 
 echo "[*] Cleaning up..."
 kubectl delete pod rbac-abuse-test --ignore-not-found

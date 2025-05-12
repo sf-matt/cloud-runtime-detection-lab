@@ -17,6 +17,12 @@ function wait_for_falco() {
   kubectl rollout status daemonset falco -n falco || { echo "❌ Falco not ready"; exit 1; }
 }
 
+function check_logs() {
+  KEYWORD="$1"
+  echo "[*] Validating keyword: $KEYWORD across all Falco pods..."
+  ./lifecycle/check-falco-logs.sh "$KEYWORD"
+}
+
 if [ "$RELOAD" = true ]; then
   echo "[*] Reloading all Falco rules..."
   ./lifecycle/deploy-falco-rules.sh all
@@ -43,15 +49,13 @@ while true; do
   case $choice in
     1)
       wait_for_falco
-      ./simulations/falco/toctou/simulate-detect.sh
-      echo "[*] Searching logs for TOCTOU..."
-      kubectl logs -n falco -l app.kubernetes.io/instance=falco --tail=200 | grep -i TOCTOU && echo "✅ TOCTOU detection fired" || echo "❌ No TOCTOU detection found"
+      ./simulations/falco/toctou/simulate-detect.sh >/dev/null 2>&1
+      check_logs TOCTOU
       ;;
     2)
       wait_for_falco
-      ./simulations/falco/rbac/simulate-rbac-abuse.sh
-      echo "[*] Searching logs for RBAC..."
-      kubectl logs -n falco -l app.kubernetes.io/instance=falco --tail=200 | grep -i secrets && echo "✅ RBAC detection fired" || echo "❌ No RBAC detection found"
+      ./simulations/falco/rbac/simulate-rbac-abuse.sh >/dev/null 2>&1
+      check_logs secrets
       ;;
     3)
       echo "[*] Applying KubeArmor policy..."
@@ -61,9 +65,8 @@ while true; do
       ;;
     4)
       wait_for_falco
-      ./simulations/falco/debug/simulate-generic-write.sh
-      echo "[*] Searching logs for generic write..."
-      kubectl logs -n falco -l app.kubernetes.io/instance=falco --tail=200 | grep -i "TEST: Write" && echo "✅ Write syscall detected" || echo "❌ No write detection found"
+      ./simulations/falco/debug/simulate-generic-write.sh >/dev/null 2>&1
+      check_logs "TEST: Write"
       ;;
     5)
       kubectl apply -f rules/kubearmor/toctou/toctou-configmap-block.yaml
@@ -71,11 +74,16 @@ while true; do
       ;;
     6)
       echo "📄 Log Viewer"
-      echo "1) Falco Logs"
+      echo "1) Falco Logs (all pods)"
       echo "2) KubeArmor Logs"
       read -p "Choice: " log_choice
       case $log_choice in
-        1) kubectl logs -n falco -l app.kubernetes.io/instance=falco --tail=100 ;;
+        1)
+          for pod in $(kubectl get pods -n falco -l app.kubernetes.io/instance=falco -o name); do
+            echo "==> $pod"
+            kubectl logs -n falco "$pod" --tail=100
+          done
+          ;;
         2) kubectl logs -n kubearmor -l kubearmor-app=kubearmor --tail=100 ;;
         *) echo "Invalid log choice." ;;
       esac

@@ -18,7 +18,7 @@ kubectl wait --for=condition=Ready pod/$POD_NAME --timeout=30s
 echo "[*] Writing to /tmp/debug.txt..."
 kubectl exec $POD_NAME -- sh -c 'echo hello > /tmp/debug.txt'
 
-echo "[*] Done. Check Falco logs for generic write detection."
+echo "[*] Done."
 
 echo "[*] Cleaning up..."
 kubectl delete pod $POD_NAME --ignore-not-found

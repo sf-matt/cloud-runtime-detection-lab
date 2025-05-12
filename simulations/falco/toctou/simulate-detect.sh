@@ -40,7 +40,7 @@ kubectl wait --for=condition=Ready pod/toctou-falco-test --timeout=30s
 echo "[*] Executing write to /mnt/configmap/entry..."
 kubectl exec toctou-falco-test -- sh -c 'echo hacked > /mnt/configmap/entry'
 
-echo "[*] Done. Check Falco logs to confirm detection."
+echo "[*] Done."
 
 echo "[*] Cleaning up..."
 kubectl delete pod toctou-falco-test --ignore-not-found
