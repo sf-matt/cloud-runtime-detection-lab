@@ -82,16 +82,6 @@ Used to dynamically drive the lab menu and auto-validate detections.
 
 ---
 
-## 📊 Detection Summary
-
-**Total Detections:** X  
-- 🐺 Falco: X  
-- 🛡️ KubeArmor: X
-
-_(Run `yq e '.[].tool' detections/_registry.yaml | sort | uniq -c` to update counts)_
-
----
-
 ## ✅ CI & Validation
 
 ### Included:
