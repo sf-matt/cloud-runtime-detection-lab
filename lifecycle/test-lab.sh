@@ -1,3 +1,4 @@
+# Deprecated: Use test-lab-v2.sh instead
 #!/bin/bash
 
 RELOAD=false

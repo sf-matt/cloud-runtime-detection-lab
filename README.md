@@ -1,108 +1,127 @@
-# ☁️ Cloud Runtime Detection Lab
+# 🛡️ Cloud Runtime Detection Lab
 
-This repo demonstrates how to build, simulate, and validate real-world Kubernetes runtime security detections using Falco and KubeArmor.
-
----
-
-## 🎯 Purpose
-
-- Build custom runtime detections and prevention rules
-- Simulate attacks to validate detections (TOCTOU, RBAC misuse, etc.)
-- Use Falco for detection and KubeArmor for enforcement
-- Validate detections with structured, test-driven workflows
-- Run tool-isolated tests from a clean CLI menu
+A hands-on, rule-driven lab for testing and validating Kubernetes runtime threat detections using tools like **Falco** and **KubeArmor**.
 
 ---
 
-## 📁 Folder Structure (Alphabetical)
+## 🚀 Quickstart
 
 ```bash
-.
-├── detections/                  # 📄 Per-scenario documentation
-│   ├── debug.md
-│   ├── detection.md             # ✅ Detection summary
-│   ├── rbac.md
-│   └── toctou.md
-├── lifecycle/                   # ⚙️ Deployment & test scripts
-│   ├── deploy-falco-rules.sh
-│   └── test-lab.sh
-├── rules/                       # 🛡️ Detection policies
-│   ├── falco/
-│   │   ├── debug/
-│   │   │   └── test-write-syscall.yaml
-│   │   ├── rbac/
-│   │   │   └── rbac-api-misuse-audit.yaml
-│   │   └── toctou/
-│   │       └── toctou-configmap-detect.yaml
-│   └── kubearmor/
-│       └── toctou/
-│           └── toctou-configmap-block.yaml
-├── simulations/                 # 🔬 Attack simulations
-│   ├── falco/
-│   │   ├── debug/
-│   │   │   └── simulate-generic-write.sh
-│   │   ├── rbac/
-│   │   │   ├── rbac-abuser-role.yaml
-│   │   │   └── simulate-rbac-abuse.sh
-│   │   └── toctou/
-│   │       └── simulate-detect.sh
-│   └── kubearmor/
-│       └── toctou/
-│           └── simulate-block.sh
-└── README.md                    # 📘 Main lab instructions
+git clone https://github.com/sf-matt/cloud-runtime-detection-lab.git
+cd cloud-runtime-detection-lab
+./bootstrap.sh
+./test-lab-v2.sh
 ```
 
 ---
 
-## 🛠 Helm Install for Full Lab Support
+## 📦 Requirements
 
-This command enables:
-- Syscall-based detections (eBPF + `-A` for full syscall coverage)
-- Audit log ingestion for Kubernetes API detections
+- ✅ Kubernetes cluster (minikube, kind, or real)
+- ✅ `kubectl` + `helm`
+- ✅ [`yq` (Mike Farah version)](https://github.com/mikefarah/yq)
+- ✅ [`bash` with arrays and `mapfile` support]
+
+---
+
+## 🧰 Tool Installation
+
+### 🐺 Install Falco
 
 ```bash
-helm upgrade --install falco falcosecurity/falco -n falco --create-namespace \
-  --set ebpf.enabled=true \
-  --set falco.jsonOutput=true \
-  --set falco.textOutput=true \
-  --set falco.args="-A" \
-  --set auditLog.enabled=true \
-  --set auditLog.dynamicBackend.enabled=true \
-  --set auditLog.dynamicBackend.config.apiVersion=v1 \
-  --set auditLog.dynamicBackend.config.kind=ConfigMap \
-  --set auditLog.dynamicBackend.config.name=auditlog-config \
-  --set auditLog.dynamicBackend.config.namespace=falco
+helm repo add falcosecurity https://falcosecurity.github.io/charts
+helm install falco falcosecurity/falco -n falco --create-namespace
+```
+
+### 🛡️ Install KubeArmor
+
+```bash
+helm repo add kubearmor https://kubearmor.github.io/charts
+helm repo update kubearmor
+helm upgrade --install kubearmor-operator kubearmor/kubearmor-operator -n kubearmor --create-namespace
+kubectl apply -f https://raw.githubusercontent.com/kubearmor/KubeArmor/main/pkg/KubeArmorOperator/config/samples/sample-config.yml
 ```
 
 ---
 
-## 🧪 Run the Test Lab
+## 🧪 Running Tests
 
+### Interactive menu:
 ```bash
-./lifecycle/test-lab.sh --reload
+./test-lab-v2.sh
 ```
+
+### Auto-run all:
+```bash
+./test-lab-v2.sh --auto
+```
+
+### Filter by category:
+```bash
+./test-lab-v2.sh --category=rbac
+```
+
+---
+
+## 🗃️ Detection Registry
+
+All detection metadata lives in:
+
+📄 [`detections/_registry.yaml`](./detections/_registry.yaml)
 
 Includes:
-- Falco TOCTOU Detection (Syscall)
-- Falco RBAC API Abuse Detection (Audit)
-- Falco Debug Rule Validation
-- KubeArmor ConfigMap Enforcement (TOCTOU)
-- Built-in cleanup + log viewer
+- Tool (Falco/KubeArmor)
+- Rule + simulation path
+- Validation keyword
+- MITRE mapping
+- Category
+
+Used to dynamically drive the lab menu and auto-validate detections.
 
 ---
 
-## 🧩 MITRE Techniques Mapped
+## 🧱 Repo Structure (Simplified)
 
-| Scenario               | Tool    | Source     | MITRE Tactics        | Status      |
-|------------------------|---------|------------|-----------------------|-------------|
-| TOCTOU ConfigMap Write | Falco   | Syscall    | T1611, T1203          | ✅ Working  |
-| RBAC API Misuse        | Falco   | k8s_audit  | T1078.004, T1087      | ✅ Working  |
-| Generic Write Debug    | Falco   | Syscall    | Diagnostic only       | ✅ Working  |
+```
+rules/              # Falco & KubeArmor detection rules
+simulations/        # Scripts to simulate attacks
+lifecycle/          # Helpers like log validators and rule deploy
+detections/
+  _registry.yaml    # Canonical detection list
+test-lab-v2.sh      # Dynamic interactive test runner
+bootstrap.sh        # Permissions + Falco rule deploy
+```
 
 ---
 
-## 🤖 Credits
+## 🧩 Gotchas
+
+| ⚠️ Issue | ✅ Fix |
+|---------|--------|
+| `yq: Unknown option -o=json` | You're using the wrong yq — install [this one](https://github.com/mikefarah/yq) |
+| `permission denied` on scripts | Run `./bootstrap.sh` to fix permissions |
+| RBAC sim fails | That’s expected — detection triggers on denial |
+| No detections show up | Make sure Falco is running and has audit logging |
+| KubeArmor doesn't block | Make sure you're running on AppArmor-compatible host (Ubuntu, etc.) |
+
+---
+
+## 🤝 Contributing
+
+We welcome PRs! Please:
+
+- Add any new detection rule to `rules/` and its matching sim to `simulations/`
+- Register your detection in `detections/_registry.yaml`
+- Follow the naming structure by tool/category/rule
+- Run `./bootstrap.sh` before testing
+- Test your detection using `test-lab-v2.sh`
+
+---
+
+## 💬 License & Attribution
+
+MIT License. Inspired by real-world attacks, open-source rulesets, and community discussions around Kubernetes runtime security.
 
 - [Falco](https://falco.org/)
 - [KubeArmor](https://github.com/kubearmor/KubeArmor)
-- [ChatGPT](https://openai.com/chatgpt) for pairing on rule tuning and detection validation
+- [ChatGPT](https://openai.com/chatgpt) for so much

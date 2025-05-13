@@ -1,0 +1,27 @@
+- name: toctou-configmap-write
+  tool: falco
+  source: syscall
+  category: toctou
+  rule: rules/falco/toctou-configmap-write.yaml
+  sim: simulations/falco/toctou/simulate-detect.sh
+  mitre: T1203
+  doc_section: detections/toctou.md
+  validate: TOCTOU
+- name: toctou-configmap-block
+  tool: kubearmor
+  source: lsm
+  category: toctou
+  rule: rules/kubearmor/toctou/toctou-configmap-block.yaml
+  sim: simulations/kubearmor/toctou/simulate-block.sh
+  mitre: T1203
+  doc_section: detections/toctou.md
+  validate: Permission denied
+- name: rbac-api-misuse
+  tool: falco
+  source: k8s_audit
+  category: rbac
+  rule: rules/falco/rbac/rbac-api-misuse.yaml
+  sim: simulations/falco/rbac/simulate-rbac-abuse.sh
+  mitre: T1552.004
+  doc_section: detections/rbac.md
+  validate: secrets
