@@ -32,15 +32,19 @@ while true; do
   clear
   echo "🧪 Runtime Detection Lab"
   echo "========================"
-  echo "Choose a detection test:"
   echo
-  echo "1) Falco: TOCTOU Detection (Syscall)"
-  echo "2) Falco: RBAC Misuse Detection (Audit Logs)"
-  echo "3) KubeArmor: TOCTOU Block Enforcement"
-  echo "4) Falco: Generic Write Debug Rule"
-  echo "5) Reapply KubeArmor Policy"
-  echo "6) View Logs"
-  echo "7) Exit"
+  echo "Falco Tests:"
+  echo "  1) TOCTOU Detection (Syscall)"
+  echo "  2) RBAC Misuse Detection (Audit Logs)"
+  echo "  3) Generic Write Debug Rule"
+  echo
+  echo "KubeArmor Tests:"
+  echo "  4) TOCTOU Block Enforcement"
+  echo "  5) Reapply TOCTOU Policy"
+  echo
+  echo "Other:"
+  echo "  6) View Logs"
+  echo "  7) Exit"
   echo
 
   read -p "Enter your choice [1-7]: " choice
@@ -49,24 +53,23 @@ while true; do
   case $choice in
     1)
       wait_for_falco
-      ./simulations/falco/toctou/simulate-detect.sh >/dev/null 2>&1
+      ./simulations/falco/toctou/simulate-detect.sh
       check_logs TOCTOU
       ;;
     2)
       wait_for_falco
-      ./simulations/falco/rbac/simulate-rbac-abuse.sh >/dev/null 2>&1
+      ./simulations/falco/rbac/simulate-rbac-abuse.sh
       check_logs secrets
       ;;
     3)
-      echo "[*] Applying KubeArmor policy..."
-      kubectl apply -f rules/kubearmor/toctou/toctou-configmap-block.yaml
-      sleep 5
-      ./simulations/kubearmor/toctou/simulate-block.sh
+      wait_for_falco
+      ./simulations/falco/debug/simulate-generic-write.sh
+      check_logs "TEST: Write"
       ;;
     4)
-      wait_for_falco
-      ./simulations/falco/debug/simulate-generic-write.sh >/dev/null 2>&1
-      check_logs "TEST: Write"
+      ./simulations/kubearmor/toctou/simulate-block.sh
+      echo "ℹ️  Check KubeArmor logs to confirm enforcement:"
+      echo "    kubectl logs -n kubearmor -l kubearmor-app=kubearmor --tail=100"
       ;;
     5)
       kubectl apply -f rules/kubearmor/toctou/toctou-configmap-block.yaml
@@ -74,16 +77,11 @@ while true; do
       ;;
     6)
       echo "📄 Log Viewer"
-      echo "1) Falco Logs (all pods)"
+      echo "1) Falco Logs"
       echo "2) KubeArmor Logs"
       read -p "Choice: " log_choice
       case $log_choice in
-        1)
-          for pod in $(kubectl get pods -n falco -l app.kubernetes.io/instance=falco -o name); do
-            echo "==> $pod"
-            kubectl logs -n falco "$pod" --tail=100
-          done
-          ;;
+        1) kubectl logs -n falco -l app.kubernetes.io/instance=falco -c falco --tail=100 ;;
         2) kubectl logs -n kubearmor -l kubearmor-app=kubearmor --tail=100 ;;
         *) echo "Invalid log choice." ;;
       esac

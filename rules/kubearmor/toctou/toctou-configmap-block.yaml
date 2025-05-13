@@ -4,13 +4,14 @@ metadata:
   name: block-configmap-write
   namespace: default
 spec:
-  severity: 4
-  message: "TOCTOU prevention: Block write access to ConfigMap directory"
   selector:
     matchLabels:
       app: demo-kubearmor
   file:
     matchDirectories:
-      - dir: /mnt/configmap/
-        recursive: true
-  action: Block
+    - dir: /mnt/configmap/
+      recursive: true
+    action: Block
+  severity: 5
+  message: "Blocked attempt to write to /mnt/configmap"
+  tags: ["TOCTOU", "configmap", "runtime"]
