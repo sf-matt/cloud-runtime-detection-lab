@@ -63,7 +63,10 @@ if [ "$AUTO_MODE" = true ]; then
     echo "▶️  [$NAME] Running: $SIM_SCRIPT"
     if [ -x "$SIM_SCRIPT" ]; then
       bash "$SIM_SCRIPT"
-      validate_logs "$VALIDATE"
+  TOOL=$(echo "$SELECTED" | yq e '.tool' -)
+  if [[ "$TOOL" == "falco" && -n "$VALIDATE" ]]; then
+    validate_logs "$VALIDATE"
+  fi
     else
       echo "❌ Simulation script not found or not executable: $SIM_SCRIPT"
     fi
@@ -112,24 +115,32 @@ while true; do
   if [[ "$choice" == "$EXIT_OPTION" ]]; then
     echo "👋 Exiting."
     break
-  elif [[ -z "${INDEX_MAP[$choice]}" ]]; then
-    echo "❌ Invalid choice."
-    continue
   fi
 
   SELECTED="${INDEX_MAP[$choice]}"
+
+  if [[ -z "$SELECTED" ]]; then
+    echo "❌ Invalid choice."
+    read -p "Press Enter to continue..." _
+    continue
+  fi
+
   SIM_SCRIPT=$(echo "$SELECTED" | yq e '.sim' -)
   VALIDATE=$(echo "$SELECTED" | yq e '.validate' -)
 
   if [[ ! -x "$SIM_SCRIPT" ]]; then
     echo "❌ Simulation script not found or not executable: $SIM_SCRIPT"
+    read -p "Press Enter to continue..." _
     continue
   fi
 
   echo "▶️  Running simulation: $SIM_SCRIPT"
   bash "$SIM_SCRIPT"
-  validate_logs "$VALIDATE"
+  TOOL=$(echo "$SELECTED" | yq e '.tool' -)
+  if [[ "$TOOL" == "falco" && -n "$VALIDATE" ]]; then
+    validate_logs "$VALIDATE"
+  fi
 
   echo
-  read -p "Press Enter to return to main menu..."
+  read -p "Press Enter to return to main menu..." _
 done

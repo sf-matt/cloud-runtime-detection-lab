@@ -1,3 +1,5 @@
+[![Build Status](https://img.shields.io/badge/lab--status-active-brightgreen)](https://github.com/sf-matt/cloud-runtime-detection-lab)
+
 # 🛡️ Cloud Runtime Detection Lab
 
 A hands-on, rule-driven lab for testing and validating Kubernetes runtime threat detections using tools like **Falco** and **KubeArmor**.
@@ -80,7 +82,27 @@ Used to dynamically drive the lab menu and auto-validate detections.
 
 ---
 
-## 🧱 Repo Structure (Simplified)
+## 📊 Detection Summary
+
+**Total Detections:** X  
+- 🐺 Falco: X  
+- 🛡️ KubeArmor: X
+
+_(Run `yq e '.[].tool' detections/_registry.yaml | sort | uniq -c` to update counts)_
+
+---
+
+## ✅ CI & Validation
+
+### Included:
+- `validate-registry.sh`: checks for required registry fields and existing sim paths
+- `rule-check.sh`: confirms rule YAML files exist and sim scripts are executable
+
+CI runs automatically on pull requests to `main`.
+
+---
+
+## 🗃️ Repo Structure
 
 ```
 rules/              # Falco & KubeArmor detection rules
@@ -90,19 +112,9 @@ detections/
   _registry.yaml    # Canonical detection list
 test-lab-v2.sh      # Dynamic interactive test runner
 bootstrap.sh        # Permissions + Falco rule deploy
+validate-registry.sh
+rule-check.sh
 ```
-
----
-
-## 🧩 Gotchas
-
-| ⚠️ Issue | ✅ Fix |
-|---------|--------|
-| `yq: Unknown option -o=json` | You're using the wrong yq — install [this one](https://github.com/mikefarah/yq) |
-| `permission denied` on scripts | Run `./bootstrap.sh` to fix permissions |
-| RBAC sim fails | That’s expected — detection triggers on denial |
-| No detections show up | Make sure Falco is running and has audit logging |
-| KubeArmor doesn't block | Make sure you're running on AppArmor-compatible host (Ubuntu, etc.) |
 
 ---
 
@@ -120,8 +132,8 @@ We welcome PRs! Please:
 
 ## 💬 License & Attribution
 
-MIT License. Inspired by real-world attacks, open-source rulesets, and community discussions around Kubernetes runtime security.
+MIT License. This project draws from real-world techniques, open source tooling, and ongoing security research into Kubernetes runtime threats.
 
 - [Falco](https://falco.org/)
 - [KubeArmor](https://github.com/kubearmor/KubeArmor)
-- [ChatGPT](https://openai.com/chatgpt) for so much
+- [ChatGPT](https://openai.com/chatgpt) — used to speed up testing, writing, and iteration

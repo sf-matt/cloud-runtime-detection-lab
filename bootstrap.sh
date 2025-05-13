@@ -1,9 +1,9 @@
 #!/bin/bash
 echo "[*] Making all scripts executable..."
-chmod +x test-lab*.sh
-chmod +x lifecycle/*.sh 2>/dev/null
-chmod +x simulations/**/*.sh 2>/dev/null
-chmod +x simulations/*/*.sh 2>/dev/null
+
+find lifecycle -name "*.sh" -exec chmod +x {} +
+find simulations/falco -name "*.sh" -exec chmod +x {} +
+find simulations/kubearmor -name "*.sh" -exec chmod +x {} +
 
 echo "[*] Deploying all custom Falco rules..."
 ./lifecycle/deploy-falco-rules.sh all
