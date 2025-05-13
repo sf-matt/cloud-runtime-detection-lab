@@ -32,15 +32,19 @@ while true; do
   clear
   echo "🧪 Runtime Detection Lab"
   echo "========================"
-  echo "Choose a detection test:"
   echo
-  echo "1) Falco: TOCTOU Detection (Syscall)"
-  echo "2) Falco: RBAC Misuse Detection (Audit Logs)"
-  echo "3) KubeArmor: TOCTOU Block Enforcement"
-  echo "4) Falco: Generic Write Debug Rule"
-  echo "5) Reapply KubeArmor Policy"
-  echo "6) View Logs"
-  echo "7) Exit"
+  echo "Falco Tests:"
+  echo "  1) TOCTOU Detection (Syscall)"
+  echo "  2) RBAC Misuse Detection (Audit Logs)"
+  echo "  3) Generic Write Debug Rule"
+  echo
+  echo "KubeArmor Tests:"
+  echo "  4) TOCTOU Block Enforcement"
+  echo "  5) Reapply TOCTOU Policy"
+  echo
+  echo "Other:"
+  echo "  6) View Logs"
+  echo "  7) Exit"
   echo
 
   read -p "Enter your choice [1-7]: " choice
@@ -58,15 +62,14 @@ while true; do
       check_logs secrets
       ;;
     3)
-      echo "[*] Applying KubeArmor policy..."
-      kubectl apply -f rules/kubearmor/toctou/toctou-configmap-block.yaml
-      sleep 5
-      ./simulations/kubearmor/toctou/simulate-block.sh
-      ;;
-    4)
       wait_for_falco
       ./simulations/falco/debug/simulate-generic-write.sh
       check_logs "TEST: Write"
+      ;;
+    4)
+      ./simulations/kubearmor/toctou/simulate-block.sh
+      echo "ℹ️  Check KubeArmor logs to confirm enforcement:"
+      echo "    kubectl logs -n kubearmor -l kubearmor-app=kubearmor --tail=100"
       ;;
     5)
       kubectl apply -f rules/kubearmor/toctou/toctou-configmap-block.yaml
@@ -78,7 +81,7 @@ while true; do
       echo "2) KubeArmor Logs"
       read -p "Choice: " log_choice
       case $log_choice in
-        1) kubectl logs -n falco -l app.kubernetes.io/instance=falco --tail=100 ;;
+        1) kubectl logs -n falco -l app.kubernetes.io/instance=falco -c falco --tail=100 ;;
         2) kubectl logs -n kubearmor -l kubearmor-app=kubearmor --tail=100 ;;
         *) echo "Invalid log choice." ;;
       esac

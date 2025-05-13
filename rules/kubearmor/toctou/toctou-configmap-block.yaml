@@ -13,5 +13,5 @@ spec:
       recursive: true
     action: Block
   severity: 5
-  message: "Blocked attempt to write to ConfigMap (TOCTOU)"
-  tags: ["TOCTOU", "configmap"]
+  message: "Blocked attempt to write to /mnt/configmap"
+  tags: ["TOCTOU", "configmap", "runtime"]
