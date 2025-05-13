@@ -1,0 +1,10 @@
+- rule: RBAC ClusterRoleBinding Creation
+  desc: Detects any creation of ClusterRoleBindings, which may indicate privilege escalation or misconfiguration.
+  condition: >
+    jevt.value.resource = "clusterrolebindings" and
+    jevt.value.verb in (create)
+  output: >
+    ClusterRoleBinding created by user=%jevt.value.user.username verb=%jevt.value.verb uri=%jevt.value.requestURI
+  priority: WARNING
+  tags: [k8s, rbac, escalation, audit]
+  source: k8s_audit

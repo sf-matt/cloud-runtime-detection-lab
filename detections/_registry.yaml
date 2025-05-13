@@ -25,3 +25,10 @@
   mitre: T1552.004
   doc_section: detections/rbac.md
   validate: secrets
+- name: rbac-clusterrole-escalation-success
+  tool: falco
+  category: rbac
+  rule: rules/falco/rbac/rbac-clusterrole-escalation.yaml
+  sim: simulations/falco/rbac/simulate-clusterrole-escalation.sh
+  validate: clusterrolebinding
+  mitre: T1068
