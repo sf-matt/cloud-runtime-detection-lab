@@ -1,28 +1,28 @@
 #!/bin/bash
 set -euo pipefail
 
-if [ $# -lt 1 ]; then
-  echo "Usage: ./start-feature.sh <feature-name>"
-  exit 1
-fi
+echo "=== Runtime Detection Scaffold ==="
+read -p "Tool (falco/kubearmor): " TOOL
+read -p "Category (e.g. rbac, creds, toctou): " CATEGORY
+read -p "Rule/Detection name (e.g. block-aws-credential-access): " RULE_NAME
 
-FEATURE_NAME="$1"
-BRANCH_NAME="feature/$FEATURE_NAME"
-
+BRANCH_NAME="feature/${RULE_NAME}"
 echo "[*] Creating and checking out branch: $BRANCH_NAME"
 git checkout -b "$BRANCH_NAME"
 
-# Optionally create base folders
-echo "[*] Scaffolding detection folders..."
-mkdir -p rules/falco/$FEATURE_NAME
-mkdir -p simulations/falco/$FEATURE_NAME
-mkdir -p detections
+echo "[*] Creating folders..."
+mkdir -p rules/${TOOL}/${CATEGORY}
+mkdir -p simulations/${TOOL}/${CATEGORY}
 
-echo "[*] Touching placeholder files..."
-touch rules/falco/$FEATURE_NAME/${FEATURE_NAME}.yaml
-touch simulations/falco/$FEATURE_NAME/simulate-${FEATURE_NAME}.sh
-chmod +x simulations/falco/$FEATURE_NAME/simulate-${FEATURE_NAME}.sh
+RULE_FILE="rules/${TOOL}/${CATEGORY}/${RULE_NAME}.yaml"
+SIM_FILE="simulations/${TOOL}/${CATEGORY}/simulate-${RULE_NAME}.sh"
 
-echo "# Placeholder" > detections/${FEATURE_NAME}.md
+echo "[*] Creating placeholder files..."
+touch "$RULE_FILE"
+touch "$SIM_FILE"
+chmod +x "$SIM_FILE"
 
-echo "✅ Branch and scaffold ready."
+echo "[*] Detection stub created:"
+echo "  Rule: $RULE_FILE"
+echo "  Sim:  $SIM_FILE"
+echo "✅ Done. Remember to update detections/_registry.yaml"

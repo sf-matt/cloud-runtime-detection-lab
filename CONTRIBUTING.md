@@ -1,72 +1,92 @@
-# 🧠 Contributing to cloud-runtime-detection-lab
+# 🤝 Contributing Guide
 
-This lab explores and validates Kubernetes runtime security detections using both **Falco** and **KubeArmor**.
+Thanks for your interest in contributing to the Kubernetes Runtime Detection Lab!
 
-Whether you're adding new detections, refining simulations, or experimenting with tooling, this doc outlines how to structure your work and what “done” looks like.
-
----
-
-## 📂 Folder Structure
-
-- `detections/` — Markdown files for each scenario (TOCTOU, RBAC, debug, etc.)
-- `lifecycle/` — Core scripts like test-lab and rule deployment
-- `rules/` — Organized by tool (`falco/`, `kubearmor/`) and use case
-- `simulations/` — Mirrors `rules/` and holds all test scripts
-- `README.md` — Project overview and usage instructions
+We welcome well-scoped additions that align with our goals:
+- Testing Kubernetes runtime detections using **Falco** or **KubeArmor**
+- Demonstrating real-world attack patterns
+- Supporting education and research in cloud-native security
 
 ---
 
-## 🌱 Branching Model
+## 🛠️ Add a New Detection
 
-This repo uses Git branches to separate stable work from active development.
-
-| Branch       | Purpose                                        |
-|--------------|------------------------------------------------|
-| `main`       | Verified detections, polished documentation    |
-| `feature/*`  | In-progress rules, simulations, or integrations|
-
-You can use branches like `feature/kubearmor-toctou`, `feature/falco-network-dns`, etc.  
-Once validated, merge into `main`.
-
----
-
-## ✅ What Counts as Complete
-
-A detection is considered complete when it meets the following:
-
-- [ ] A YAML rule exists in `rules/<tool>/<use-case>/`
-- [ ] A simulation script exists in `simulations/<tool>/<use-case>/`
-- [ ] Logs confirm detection (via `test-lab.sh`)
-- [ ] Detection is documented in `detections/<use-case>.md`
-- [ ] Rule maps to at least one MITRE ATT&CK technique (where applicable)
-
----
-
-## 🧪 Testing Your Work
+### 1. Scaffold it
+Run the scaffold script:
 
 ```bash
-# Deploy updated rules
-./lifecycle/deploy-falco-rules.sh all
-
-# Run a simulation
-./lifecycle/test-lab.sh --reload
-
-# View logs
-kubectl logs -n falco -l app.kubernetes.io/instance=falco --tail=300
+./start-feature.sh
 ```
 
-For KubeArmor, use:
+You’ll be prompted to enter:
+- Tool (`falco` or `kubearmor`)
+- Category (e.g. `rbac`, `toctou`, `creds`)
+- Detection name (e.g. `block-service-token`)
+
+This will:
+- Create a feature branch
+- Add:
+  - `rules/<tool>/<category>/<name>.yaml`
+  - `simulations/<tool>/<category>/simulate-<name>.sh`
+
+### 2. Implement your detection and simulation
+Make sure:
+- Your rule is syntactically valid
+- The simulation runs in a standard Kubernetes cluster
+- Block or detect behavior is observable and verifiable
+
+### 3. Register it
+Add a new entry to:
+
+```
+detections/_registry.yaml
+```
+
+Include:
+- `tool`
+- `category`
+- `rule` and `sim` paths
+- `validate` keyword (if it should be checked by CI)
+- (Optional) `mitre` technique mappings
+
+### 4. Test it locally
+Use the interactive lab runner:
 
 ```bash
-kubectl logs -n kubearmor -l kubearmor-app=kubearmor --tail=300
+./lifecycle/test-lab-v2.sh
 ```
+
+Or run your simulation script directly.
 
 ---
 
-## 💬 Notes
+## ✅ Validation & CI
 
-- Debug rules and general test scripts should live in `debug/` folders
-- Keep simulations self-cleaning where possible
-- Keep rule conditions minimal but meaningful
+All rules and simulations are automatically validated via GitHub Actions.
 
-Thanks for contributing to runtime security learning!
+To validate locally:
+
+```bash
+./scripts/validate-falco-rules.sh
+./scripts/validate-kubearmor-policies.sh
+```
+
+Please run these before submitting your pull request.
+
+---
+
+## 🚀 Submit Your Pull Request
+
+Once your detection is ready:
+
+1. Push your feature branch
+2. Open a pull request against `main`
+3. In your PR description, include:
+   - What your rule detects
+   - How the simulation demonstrates it
+   - Any MITRE ATT&CK techniques it aligns with
+
+---
+
+Thanks again! 🔍  
+Let’s build better detections — one controlled exploit at a time.

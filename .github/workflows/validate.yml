@@ -18,7 +18,7 @@ jobs:
           sudo chmod +x /usr/bin/yq
 
       - name: Run registry validator
-        run: ./validate-registry.sh
+        run: ./scripts/validate-registry.sh
 
       - name: Run rule + sim check
-        run: ./rule-check.sh
+        run: ./scripts/rule-check.sh
