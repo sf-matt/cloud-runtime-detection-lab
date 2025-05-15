@@ -32,3 +32,10 @@
   sim: simulations/falco/rbac/simulate-clusterrole-escalation.sh
   validate: clusterrolebinding
   mitre: T1068
+- name: kubearmor-aws-credential-block
+  tool: kubearmor
+  category: creds
+  rule: rules/kubearmor/creds/block-aws-credential-access.yaml
+  sim: simulations/kubearmor/creds/simulate-block-aws-credential-access.sh
+  mitre: [T1552]
+  validate: true
