@@ -1,8 +1,8 @@
-- name: toctou-configmap-write
+- name: toctou-configmap-detect
   tool: falco
   source: syscall
   category: toctou
-  rule: rules/falco/toctou-configmap-write.yaml
+  rule: rules/falco/toctou-configmap-detect.yaml
   sim: simulations/falco/toctou/simulate-detect.sh
   mitre: T1203
   doc_section: detections/toctou.md
