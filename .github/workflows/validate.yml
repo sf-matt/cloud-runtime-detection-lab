@@ -19,9 +19,9 @@ jobs:
 
       - name: Make all scripts executable
         run: |
-          chmod +x ./scripts/*.sh
-          chmod +x ./lifecycle/*.sh
-          chmod +x ./simulations/**/*.sh || true
+          find ./scripts -type f -name "*.sh" -exec chmod +x {} \;
+          find ./lifecycle -type f -name "*.sh" -exec chmod +x {} \;
+          find ./simulations -type f -name "*.sh" -exec chmod +x {} \;
 
       - name: Run registry validator
         run: ./scripts/validate-registry.sh
