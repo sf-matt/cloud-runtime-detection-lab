@@ -20,7 +20,7 @@
   tool: falco
   source: k8s_audit
   category: rbac
-  rule: rules/falco/rbac/rbac-api-misuse.yaml
+  rule: rules/falco/rbac/rbac-api-misuse-detect.yaml
   sim: simulations/falco/rbac/simulate-rbac-abuse.sh
   mitre: T1552.004
   doc_section: detections/rbac.md
