@@ -1,8 +1,8 @@
-- name: toctou-configmap-write
+- name: toctou-configmap-detect
   tool: falco
   source: syscall
   category: toctou
-  rule: rules/falco/toctou-configmap-write.yaml
+  rule: rules/falco/toctou/toctou-configmap-detect.yaml
   sim: simulations/falco/toctou/simulate-detect.sh
   mitre: T1203
   doc_section: detections/toctou.md
@@ -20,7 +20,7 @@
   tool: falco
   source: k8s_audit
   category: rbac
-  rule: rules/falco/rbac/rbac-api-misuse.yaml
+  rule: rules/falco/rbac/rbac-api-misuse-detect.yaml
   sim: simulations/falco/rbac/simulate-rbac-abuse.sh
   mitre: T1552.004
   doc_section: detections/rbac.md
@@ -32,3 +32,10 @@
   sim: simulations/falco/rbac/simulate-clusterrole-escalation.sh
   validate: clusterrolebinding
   mitre: T1068
+- name: kubearmor-aws-credential-block
+  tool: kubearmor
+  category: creds
+  rule: rules/kubearmor/creds/block-aws-credential-access.yaml
+  sim: simulations/kubearmor/creds/simulate-block-aws-credential-access.sh
+  mitre: [T1552]
+  validate: true
